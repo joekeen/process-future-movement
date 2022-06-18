@@ -48,7 +48,7 @@ public class TransactionController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, pFormat.getContentType())
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=Output.".concat(pFormat.toString().toLowerCase()))
+                        "attachment; filename=Output.".concat(pFormat.toString()))
                 .body(new ByteArrayResource(pFormat.getToByteArray().apply(pSummaries)));
     }
 

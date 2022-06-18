@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public enum DownloadFormatEnum {
 
-    CSV(MediaType.TEXT_PLAIN_VALUE,
+    csv(MediaType.TEXT_PLAIN_VALUE,
             list -> Stream.concat(
                     Stream.of(EnumSet.allOf(DailySummaryFieldV1Enum.class).stream()
                             .map(DailySummaryFieldV1Enum::getHeader)

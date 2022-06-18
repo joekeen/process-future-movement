@@ -4,9 +4,12 @@
 ##POST
 /api/v1/upload
 
+returns
+`{ jobId: 1, jobStatus: "COMPLETED", message: null, detailedMessage: null }`
+
 ##GET
 /api/v1/job/{id}
-{ jobId: 1, jobStatus: "COMPLETED", message: null }
+`{ jobId: 1, jobStatus: "COMPLETED", message: null, detailedMessage: null }`
 
 /api/v1/summary/{jobId}
 ```
@@ -28,3 +31,11 @@ CL123400030001,CMEFUNK.20100910,-215
 CL432100020001,SGXFUNK20100910,46
 CL432100030001,CMEFUN120100910,-79
 ```
+
+
+
+
+Run ./mvnw install
+THen
+docker build -t au.id.keen/pfm .
+docker run -p 8080:8080 au.id.keen/pfm
