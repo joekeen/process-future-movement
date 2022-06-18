@@ -32,9 +32,9 @@ public class Transaction {
     private String movementCode;
     private String buySellCode;
     private String quantityLongSign;
-    private String quatityLong;
+    private Long quantityLong;
     private String quantityShortSign;
-    private String quantityShort;
+    private Long quantityShort;
     private String exchBrokerFeeDec;
     private String exchBrokerFeeDC;
     private String exchBrokerFeeCurCode;

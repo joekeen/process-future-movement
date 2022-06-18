@@ -36,9 +36,9 @@ public class RecordFieldSetMapper implements FieldSetMapper<Transaction> {
         transaction.setMovementCode(fieldSet.readString(TransactionFieldV1Enum.MOVEMENT_CODE.getFieldName()));
         transaction.setBuySellCode(fieldSet.readString(TransactionFieldV1Enum.BUY_SELL_CODE.getFieldName()));
         transaction.setQuantityLongSign(fieldSet.readString(TransactionFieldV1Enum.QUANTITY_LONG_SIGN.getFieldName()));
-        transaction.setQuatityLong(fieldSet.readString(TransactionFieldV1Enum.QUANTITY_LONG.getFieldName()));
+        transaction.setQuantityLong(fieldSet.readLong(TransactionFieldV1Enum.QUANTITY_LONG.getFieldName()));
         transaction.setQuantityShortSign(fieldSet.readString(TransactionFieldV1Enum.QUANTITY_SHORT_SIGN.getFieldName()));
-        transaction.setQuantityShort(fieldSet.readString(TransactionFieldV1Enum.QUANTITY_SHORT.getFieldName()));
+        transaction.setQuantityShort(fieldSet.readLong(TransactionFieldV1Enum.QUANTITY_SHORT.getFieldName()));
         transaction.setExchBrokerFeeDec(fieldSet.readString(TransactionFieldV1Enum.EXCH_BROKER_FEE_DEC.getFieldName()));
         transaction.setExchBrokerFeeDC(fieldSet.readString(TransactionFieldV1Enum.EXCH_BROKER_FEE_DC.getFieldName()));
         transaction.setExchBrokerFeeCurCode(fieldSet.readString(TransactionFieldV1Enum.EXCH_BROKER_FEE_CUR_CODE.getFieldName()));

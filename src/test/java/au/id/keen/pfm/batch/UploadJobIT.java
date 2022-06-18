@@ -2,6 +2,7 @@ package au.id.keen.pfm.batch;
 
 import au.id.keen.pfm.ProcessedFutureMovementApplication;
 import au.id.keen.pfm.domain.Transaction;
+import au.id.keen.pfm.dto.DailySummary;
 import au.id.keen.pfm.repository.TransactionRepository;
 import org.junit.After;
 import org.junit.Test;
@@ -73,6 +74,9 @@ public class UploadJobIT {
 
         List<Transaction> transactions = transactionRepository.findAll();
         assertEquals(717, transactions.size());
+
+        List<DailySummary> records = transactionRepository.getDailySummary(jobExecution.getJobId());
+        assertEquals(5, records.size());
     }
 
 }

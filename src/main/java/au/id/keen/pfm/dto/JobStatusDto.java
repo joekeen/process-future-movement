@@ -5,8 +5,8 @@ import lombok.Value;
 @Value
 public class JobStatusDto {
 
-    private Long jobId;
-    private String jobStatus;
-    private String message;
+    Long jobId;
+    String jobStatus;
+    String message;
 
 }

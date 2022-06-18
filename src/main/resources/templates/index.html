@@ -26,7 +26,7 @@
 
         function handleSubmit(event) {
             event.preventDefault()
-            const url = 'http://localhost:8080/upload';
+            const url = 'http://localhost:8080/api/v1/upload';
             const formData = new FormData();
             formData.append('file', file);
             formData.append('fileName', file.name);
@@ -44,7 +44,7 @@
         return (
             <div className="App">
                 <form onSubmit={handleSubmit}>
-                    <h1>React File Upload</h1>
+                    <h1>Transaction File Upload</h1>
                     <input type="file" onChange={handleChange}/>
                     <button type="submit">Upload</button>
                 </form>

@@ -1,8 +1,8 @@
 package au.id.keen.pfm.config;
 
-import au.id.keen.pfm.mapper.RecordFieldSetMapper;
-import au.id.keen.pfm.enums.TransactionFieldV1Enum;
 import au.id.keen.pfm.domain.Transaction;
+import au.id.keen.pfm.enums.TransactionFieldV1Enum;
+import au.id.keen.pfm.mapper.RecordFieldSetMapper;
 import au.id.keen.pfm.repository.TransactionRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -14,6 +14,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.batch.item.data.RepositoryItemWriter;
@@ -25,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import java.util.Arrays;
@@ -34,17 +34,12 @@ import java.util.Arrays;
 @EnableBatchProcessing
 public class FutureTransactionBatchConfig {
 
-    @Value("src/test/resources/input/Input.txt")
-    private Resource input;
-
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final TransactionRepository transactionRepository;
 
-    public FutureTransactionBatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, TransactionRepository transactionRepository) {
+    public FutureTransactionBatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
-        this.transactionRepository = transactionRepository;
     }
 
     @Bean
@@ -57,30 +52,28 @@ public class FutureTransactionBatchConfig {
     }
 
     @Bean
-    public Job uploadJob(ItemReader<Transaction> itemReader) {
+    public Job uploadJob(ItemReader<Transaction> itemReader, ItemWriter<Transaction> itemWriter) {
         return jobBuilderFactory.get("uploadJob")
-//                .incrementer(new RunIdIncrementer()0)
-                .start(step1(itemReader))
+                .start(step1(itemReader, itemWriter))
                 .build();
     }
 
     @Bean
-    public Step step1(ItemReader<Transaction> itemReader) {
+    public Step step1(ItemReader<Transaction> itemReader, ItemWriter<Transaction> itemWriter) {
         return stepBuilderFactory.get("step1")
-                .<Transaction, Transaction> chunk(20)
+                .<Transaction, Transaction>chunk(20)
                 .reader(itemReader)
-//                .processor(processor())
-                .writer(writer())
+                .writer(itemWriter)
                 .build();
     }
 
     // Creates the Writer, configuring the repository and the method that will be used to save the data into the database
     @Bean
-    public RepositoryItemWriter<Transaction> writer() {
-        RepositoryItemWriter<Transaction> iwriter = new RepositoryItemWriter<>();
-        iwriter.setRepository(transactionRepository);
-        iwriter.setMethodName("save");
-        return iwriter;
+    public RepositoryItemWriter<Transaction> itemWriter(TransactionRepository pTransactionRepository) {
+        RepositoryItemWriter<Transaction> writer = new RepositoryItemWriter<>();
+        writer.setRepository(pTransactionRepository);
+        writer.setMethodName("save");
+        return writer;
     }
 
     @Bean
@@ -88,18 +81,14 @@ public class FutureTransactionBatchConfig {
     public FlatFileItemReader<Transaction> itemReader(@Value("#{jobParameters['file.path']}") String pPath,
                                                       @Value("#{stepExecution.jobExecutionId}") Long pJobExecutionId) throws UnexpectedInputException, ParseException {
 
-        //FlatFileItemReaderBuilder<Transaction> builder = new FlatFileItemReaderBuilder<>();
-
         FlatFileItemReader<Transaction> reader = new FlatFileItemReader<>();
+        reader.setResource(new FileSystemResource(pPath));
 
         FixedLengthTokenizer tokenizer = new FixedLengthTokenizer();
-        tokenizer.setStrict(false);
         tokenizer.setColumns(Arrays.stream(TransactionFieldV1Enum.values())
                 .map(r -> new Range(r.getRangeStart(), r.getRangeEnd())).toArray(Range[]::new));
         tokenizer.setNames(Arrays.stream(TransactionFieldV1Enum.values())
                 .map(TransactionFieldV1Enum::getFieldName).toArray(String[]::new));
-
-        reader.setResource(new FileSystemResource(pPath));
 
         DefaultLineMapper<Transaction> lineMapper = new DefaultLineMapper<>();
         lineMapper.setLineTokenizer(tokenizer);
@@ -110,13 +99,4 @@ public class FutureTransactionBatchConfig {
         return reader;
     }
 
-/*    @Bean
-    public FixedLengthTokenizer tokenizer() {
-        FixedLengthTokenizer tokenizer = new FixedLengthTokenizer();
-        tokenizer.setColumns(Arrays.stream(ProcessedFutureMovementRecordEnum.values())
-                .map(r -> new Range(r.getRangeStart(), r.getRangeEnd())).toArray(Range[]::new));
-        tokenizer.setNames(Arrays.stream(ProcessedFutureMovementRecordEnum.values())
-                .map(ProcessedFutureMovementRecordEnum::getFieldName).toArray(String[]::new));
-        return tokenizer;
-    }*/
 }
