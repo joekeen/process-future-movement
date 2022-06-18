@@ -37,9 +37,9 @@ public class FutureTransactionBatchConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
-    public FutureTransactionBatchConfig(JobBuilderFactory pJobBuilderFactory, StepBuilderFactory pStepBuilderFactory) {
-        this.jobBuilderFactory = pJobBuilderFactory;
-        this.stepBuilderFactory = pStepBuilderFactory;
+    public FutureTransactionBatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
+        this.jobBuilderFactory = jobBuilderFactory;
+        this.stepBuilderFactory = stepBuilderFactory;
     }
 
     @Bean
@@ -67,7 +67,6 @@ public class FutureTransactionBatchConfig {
                 .build();
     }
 
-    // Creates the Writer, configuring the repository and the method that will be used to save the data into the database
     @Bean
     public RepositoryItemWriter<Transaction> itemWriter(TransactionRepository pTransactionRepository) {
         RepositoryItemWriter<Transaction> writer = new RepositoryItemWriter<>();

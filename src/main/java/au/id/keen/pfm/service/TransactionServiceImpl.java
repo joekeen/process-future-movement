@@ -1,12 +1,13 @@
 package au.id.keen.pfm.service;
 
-import au.id.keen.pfm.dto.DailySummaryDto;
+import au.id.keen.pfm.dto.DailySummary;
 import au.id.keen.pfm.dto.JobStatusDto;
 import au.id.keen.pfm.repository.TransactionRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -14,7 +15,6 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -22,11 +22,13 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final JobLauncher jobLauncher;
     private final Job uploadJob;
+    private final JobExplorer jobExplorer;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, JobLauncher jobLauncher, Job uploadJob) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, JobLauncher jobLauncher, Job uploadJob, JobExplorer jobExplorer) {
         this.transactionRepository = transactionRepository;
         this.jobLauncher = jobLauncher;
         this.uploadJob = uploadJob;
+        this.jobExplorer = jobExplorer;
     }
 
     @Override
@@ -42,9 +44,17 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<DailySummaryDto> getRecords(Long pJobId) {
-        return transactionRepository.getDailySummary(pJobId)
-                .stream().map(DailySummaryDto::new).collect(Collectors.toList());
+    public JobStatusDto queryJob(Long pJobId) {
+        JobExecution execution = jobExplorer.getJobExecution(pJobId);
+        if (execution != null) {
+            return new JobStatusDto(pJobId, execution.getStatus().toString(), null, null);
+        }
+        return new JobStatusDto(pJobId, null, "Job ID not found", null);
+    }
+
+    @Override
+    public List<DailySummary> getRecords(Long pJobId) {
+        return transactionRepository.getDailySummary(pJobId);
     }
 
 }

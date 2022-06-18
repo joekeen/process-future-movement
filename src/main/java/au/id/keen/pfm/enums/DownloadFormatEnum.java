@@ -1,11 +1,11 @@
 package au.id.keen.pfm.enums;
 
-import au.id.keen.pfm.dto.DailySummaryDto;
+import au.id.keen.pfm.dto.DailySummary;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.MediaType;
 
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -15,9 +15,9 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public enum DownloadFormatEnum {
 
-    csv(MediaType.TEXT_PLAIN_VALUE,
+    CSV(MediaType.TEXT_PLAIN_VALUE,
             list -> Stream.concat(
-                    Stream.of(Arrays.stream(DailySummaryFieldV1Enum.values())
+                    Stream.of(EnumSet.allOf(DailySummaryFieldV1Enum.class).stream()
                             .map(DailySummaryFieldV1Enum::getHeader)
                             .collect(Collectors.joining(","))),
                     list.stream()
@@ -30,5 +30,5 @@ public enum DownloadFormatEnum {
                     .getBytes());
 
     private final String contentType;
-    private final Function<List<DailySummaryDto>, byte[]> toByteArray;
+    private final Function<List<DailySummary>, byte[]> toByteArray;
 }
