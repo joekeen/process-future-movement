@@ -42,7 +42,12 @@ public class TransactionController {
     }
 
     @PostMapping("/upload")
-    public JobStatusDto upload(@RequestParam MultipartFile file) throws IOException {
+    public JobStatusDto upload(@RequestParam MultipartFile pFile) throws IOException {
+        return transactionService.upload(FileUtils.getTempFile(pFile).getAbsolutePath());
+    }
+
+    @PostMapping("/upload/async")
+    public JobStatusDto uploadAsync(@RequestParam MultipartFile pFile) throws IOException {
 
 /*        File tempFile = File.createTempFile("upl", null);
 
@@ -56,21 +61,15 @@ public class TransactionController {
         Files.createTempFile()*/
 
         JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addString("file.path", FileUtils.getTempFile(file).getAbsolutePath());
+        builder.addString("file.path", FileUtils.getTempFile(pFile).getAbsolutePath());
         // add date time stamp
 //        builder.addString("dateTime", LocalDateTime.now());
 
         try {
             JobExecution execution = jobLauncher.run(uploadJob, builder.toJobParameters());
-            return new JobStatusDto(execution.getJobId(), execution.getStatus().toString(), null);
-        } catch (JobExecutionAlreadyRunningException e) {
-            e.printStackTrace();
-        } catch (JobRestartException e) {
-            e.printStackTrace();
-        } catch (JobInstanceAlreadyCompleteException e) {
-            e.printStackTrace();
-        } catch (JobParametersInvalidException e) {
-            e.printStackTrace();
+            return new JobStatusDto(execution.getJobId(), execution.getStatus().toString(), null, null);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
+            return new JobStatusDto(null, null, "An error occurred.", e.getMessage());
         }
 
         /*while (job ! finished) {
@@ -79,23 +78,22 @@ public class TransactionController {
 
 //        tempFile.delete();
 
-        return new JobStatusDto(null, null, null);
     }
 
-    @GetMapping("/job/{pId}")
-    public JobStatusDto job(@PathVariable Long pId) {
-        JobExecution execution = jobExplorer.getJobExecution(pId);
+    @GetMapping("/job/{pJobId}")
+    public JobStatusDto job(@PathVariable Long pJobId) {
+        JobExecution execution = jobExplorer.getJobExecution(pJobId);
         if (execution != null) {
-            return new JobStatusDto(pId, execution.getStatus().toString(), null);
+            return new JobStatusDto(pJobId, execution.getStatus().toString(), null, null);
         }
-        return new JobStatusDto(pId, null, "Job ID not found");
+        return new JobStatusDto(pJobId, null, "Job ID not found", null);
     }
 
     @GetMapping("/summary/{pJobId}")
     public ResponseEntity<?> getSummary(@PathVariable Long pJobId,
-                                        @RequestParam(required = false) DownloadFormatEnum format) {
+                                        @RequestParam(required = false, name = "format") DownloadFormatEnum pFormat) {
         List<DailySummaryDto> summaries = transactionService.getRecords(pJobId);
-        return getResponse(summaries, format);
+        return getResponse(summaries, pFormat);
     }
 
     private ResponseEntity<?> getResponse(List<DailySummaryDto> pSummaries, DownloadFormatEnum pFormat) {

@@ -11,5 +11,5 @@ public enum DailySummaryFieldV1Enum {
     PRODUCT_INFORMATION("Product_Information"),
     TOTAL_TRANSACTION_AMOUNT("Total_Transaction_Amount");
 
-    private String header;
+    private final String header;
 }

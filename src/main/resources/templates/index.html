@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <title>Hello World</title>
+    <meta charset="UTF-8"/>
+    <title>Processed Future Movement</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -14,19 +14,38 @@
 <div id="root"></div>
 <script type="text/babel">
 
-    //import React, {useState} from react;
-
     function MyApp() {
 
         const [file, setFile] = React.useState()
+        const [jobId, setJobId] = React.useState()
+        const [jobStatus, setJobStatus] = React.useState()
+        const [json, setJson] = React.useState()
+        const [message, setMessage] = React.useState()
 
         function handleChange(event) {
             setFile(event.target.files[0])
         }
 
+
+        const API_URL = 'http://localhost:8080/api/v1';
+        const SUMMARY_URL = API_URL + '/summary/';
+
+        function handleDownload() {
+            const url = SUMMARY_URL + jobId;
+            axios.get(url).then((response) => {
+                setJson(response.data);
+            });
+
+        }
+
+        function handleDownloadCSV() {
+            const url = SUMMARY_URL + jobId + '?format=csv';
+            window.location.assign(url);
+        }
+
         function handleSubmit(event) {
             event.preventDefault()
-            const url = 'http://localhost:8080/api/v1/upload';
+            const url = API_URL + '/upload';
             const formData = new FormData();
             formData.append('file', file);
             formData.append('fileName', file.name);
@@ -36,25 +55,62 @@
                 },
             };
             axios.post(url, formData, config).then((response) => {
-                console.log(response.data);
+                if (response.data.jobId) {
+                    setJobId(response.data.jobId);
+                    setJobStatus(response.data.jobStatus);
+                }
+                if (response.data.message) {
+                    setMessage(response.data.message);
+                } else {
+                    setMessage(null);
+                }
             });
 
         }
 
+        const appStyles = {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100vh',
+        }
+
         return (
-            <div className="App">
-                <form onSubmit={handleSubmit}>
-                    <h1>Transaction File Upload</h1>
-                    <input type="file" onChange={handleChange}/>
-                    <button type="submit">Upload</button>
-                </form>
+            <div className="App" style={appStyles}>
+                {jobStatus == null ?
+                    <div>
+                        <form onSubmit={handleSubmit}>
+                            <h1>Transaction File Upload</h1>
+                            <input type="file" onChange={handleChange}/>
+                            <button type="submit">Upload</button>
+                        </form>
+                        {message != null ? <p>{message}</p> : null}
+                    </div>
+                    :
+                    jobStatus === 'COMPLETED' ?
+                        <div>
+                            <button type="button" onClick={handleDownload}>Download Summary (JSON)</button>
+                            &nbsp;
+                            <button type="button" onClick={handleDownloadCSV}>Download Summary (CSV)</button>
+                            <br/>
+                            <p>Refresh page to upload another file.</p>
+                        </div>
+                        : <button type="button">Query</button>
+                }
+                {json != null ?
+                    <div>
+                    <pre>
+                        <code>{JSON.stringify(json, null, 4)}</code>
+                    </pre>
+                    </div>
+                    : null}
             </div>
         );
     }
 
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
-    root.render(<MyApp />);
+    root.render(<MyApp/>);
 
 </script>
 <!--

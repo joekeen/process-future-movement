@@ -8,5 +8,6 @@ public class JobStatusDto {
     Long jobId;
     String jobStatus;
     String message;
+    String detailedMessage;
 
 }

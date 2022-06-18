@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
-import java.util.Arrays;
+import java.util.EnumSet;
 
 @Configuration
 @EnableBatchProcessing
@@ -37,33 +37,33 @@ public class FutureTransactionBatchConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
-    public FutureTransactionBatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
-        this.jobBuilderFactory = jobBuilderFactory;
-        this.stepBuilderFactory = stepBuilderFactory;
+    public FutureTransactionBatchConfig(JobBuilderFactory pJobBuilderFactory, StepBuilderFactory pStepBuilderFactory) {
+        this.jobBuilderFactory = pJobBuilderFactory;
+        this.stepBuilderFactory = pStepBuilderFactory;
     }
 
     @Bean
-    public JobLauncher asyncJobLauncher(JobRepository jobRepository) throws Exception {
+    public JobLauncher asyncJobLauncher(JobRepository pJobRepository) throws Exception {
         SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
-        jobLauncher.setJobRepository(jobRepository);
+        jobLauncher.setJobRepository(pJobRepository);
         jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor());
         jobLauncher.afterPropertiesSet();
         return jobLauncher;
     }
 
     @Bean
-    public Job uploadJob(ItemReader<Transaction> itemReader, ItemWriter<Transaction> itemWriter) {
+    public Job uploadJob(ItemReader<Transaction> pItemReader, ItemWriter<Transaction> pItemWriter) {
         return jobBuilderFactory.get("uploadJob")
-                .start(step1(itemReader, itemWriter))
+                .start(processFile(pItemReader, pItemWriter))
                 .build();
     }
 
     @Bean
-    public Step step1(ItemReader<Transaction> itemReader, ItemWriter<Transaction> itemWriter) {
-        return stepBuilderFactory.get("step1")
+    public Step processFile(ItemReader<Transaction> pItemReader, ItemWriter<Transaction> pItemWriter) {
+        return stepBuilderFactory.get("processFile")
                 .<Transaction, Transaction>chunk(20)
-                .reader(itemReader)
-                .writer(itemWriter)
+                .reader(pItemReader)
+                .writer(pItemWriter)
                 .build();
     }
 
@@ -79,20 +79,21 @@ public class FutureTransactionBatchConfig {
     @Bean
     @StepScope // object will share lifetime with StepExecution, allows us to inject dynamic values at runtime
     public FlatFileItemReader<Transaction> itemReader(@Value("#{jobParameters['file.path']}") String pPath,
-                                                      @Value("#{stepExecution.jobExecutionId}") Long pJobExecutionId) throws UnexpectedInputException, ParseException {
+                                                      @Value("#{stepExecution.jobExecutionId}") Long pJobId) throws UnexpectedInputException, ParseException {
 
         FlatFileItemReader<Transaction> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(pPath));
 
         FixedLengthTokenizer tokenizer = new FixedLengthTokenizer();
-        tokenizer.setColumns(Arrays.stream(TransactionFieldV1Enum.values())
+        EnumSet<TransactionFieldV1Enum> fields = EnumSet.allOf(TransactionFieldV1Enum.class);
+        tokenizer.setColumns(fields.stream()
                 .map(r -> new Range(r.getRangeStart(), r.getRangeEnd())).toArray(Range[]::new));
-        tokenizer.setNames(Arrays.stream(TransactionFieldV1Enum.values())
+        tokenizer.setNames(fields.stream()
                 .map(TransactionFieldV1Enum::getFieldName).toArray(String[]::new));
 
         DefaultLineMapper<Transaction> lineMapper = new DefaultLineMapper<>();
         lineMapper.setLineTokenizer(tokenizer);
-        lineMapper.setFieldSetMapper(new RecordFieldSetMapper(pJobExecutionId));
+        lineMapper.setFieldSetMapper(new RecordFieldSetMapper(pJobId));
 
         reader.setLineMapper(lineMapper);
 
