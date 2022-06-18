@@ -10,6 +10,9 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
@@ -23,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import java.util.Arrays;
 
@@ -41,6 +45,15 @@ public class FutureTransactionBatchConfig {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.transactionRepository = transactionRepository;
+    }
+
+    @Bean
+    public JobLauncher asyncJobLauncher(JobRepository jobRepository) throws Exception {
+        SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
+        jobLauncher.setJobRepository(jobRepository);
+        jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor());
+        jobLauncher.afterPropertiesSet();
+        return jobLauncher;
     }
 
     @Bean
@@ -72,7 +85,8 @@ public class FutureTransactionBatchConfig {
 
     @Bean
     @StepScope // object will share lifetime with StepExecution, allows us to inject dynamic values at runtime
-    public FlatFileItemReader<Transaction> itemReader(@Value("#{jobParameters['file.path']}") String path) throws UnexpectedInputException, ParseException {
+    public FlatFileItemReader<Transaction> itemReader(@Value("#{jobParameters['file.path']}") String pPath,
+                                                      @Value("#{stepExecution.jobExecutionId}") Long pJobExecutionId) throws UnexpectedInputException, ParseException {
 
         //FlatFileItemReaderBuilder<Transaction> builder = new FlatFileItemReaderBuilder<>();
 
@@ -85,11 +99,11 @@ public class FutureTransactionBatchConfig {
         tokenizer.setNames(Arrays.stream(TransactionFieldV1Enum.values())
                 .map(TransactionFieldV1Enum::getFieldName).toArray(String[]::new));
 
-        reader.setResource(new FileSystemResource(path));
+        reader.setResource(new FileSystemResource(pPath));
 
         DefaultLineMapper<Transaction> lineMapper = new DefaultLineMapper<>();
         lineMapper.setLineTokenizer(tokenizer);
-        lineMapper.setFieldSetMapper(new RecordFieldSetMapper());
+        lineMapper.setFieldSetMapper(new RecordFieldSetMapper(pJobExecutionId));
 
         reader.setLineMapper(lineMapper);
 

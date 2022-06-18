@@ -72,6 +72,7 @@ public class UploadJobIT {
         assertEquals("COMPLETED", exitStatus.getExitCode());
 
         List<Transaction> transactions = transactionRepository.findAll();
+        assertEquals(717, transactions.size());
     }
 
 }
