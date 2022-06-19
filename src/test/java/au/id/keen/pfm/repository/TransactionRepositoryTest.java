@@ -2,8 +2,6 @@ package au.id.keen.pfm.repository;
 
 import au.id.keen.pfm.domain.Transaction;
 import au.id.keen.pfm.dto.DailySummary;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +19,6 @@ class TransactionRepositoryTest {
 
     @Autowired
     private TransactionRepository transactionRepository;
-
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
 
     @Test
     void testGetDailySummary() {
