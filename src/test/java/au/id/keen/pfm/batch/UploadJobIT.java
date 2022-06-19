@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @EnableAutoConfiguration
 @ContextConfiguration(classes = {ProcessedFutureMovementApplication.class})
 //@ContextConfiguration(classes = {FutureTransactionBatchConfig.class})
-@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
         DirtiesContextTestExecutionListener.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class UploadJobIT {

@@ -4,7 +4,6 @@ import au.id.keen.pfm.dto.DailySummary;
 import au.id.keen.pfm.dto.JobStatusDto;
 import au.id.keen.pfm.enums.DownloadFormatEnum;
 import au.id.keen.pfm.service.TransactionService;
-import au.id.keen.pfm.util.FileUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ public class TransactionController {
 
     @PostMapping("/upload")
     public JobStatusDto postUploadFile(@RequestParam(name = "file") MultipartFile pFile) throws IOException {
-        return transactionService.processFile(FileUtils.getTempFile(pFile).getAbsolutePath());
+        return transactionService.processFile(pFile);
     }
 
     @GetMapping("/job/{pJobId}")

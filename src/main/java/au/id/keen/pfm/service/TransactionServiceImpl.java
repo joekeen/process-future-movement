@@ -3,6 +3,7 @@ package au.id.keen.pfm.service;
 import au.id.keen.pfm.dto.DailySummary;
 import au.id.keen.pfm.dto.JobStatusDto;
 import au.id.keen.pfm.repository.TransactionRepository;
+import au.id.keen.pfm.util.FileUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -13,7 +14,10 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -32,15 +36,23 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public JobStatusDto processFile(String pPath) {
+    public JobStatusDto processFile(MultipartFile pFile) throws IOException {
         JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addString("file.path", pPath);
+        File tempFile = FileUtils.getTempFile(pFile);
+        builder.addString("file.path", tempFile.getAbsolutePath());
         try {
+            // job is currently run synchronously
             JobExecution execution = jobLauncher.run(uploadJob, builder.toJobParameters());
+            tempFile.delete();
             return new JobStatusDto(execution.getJobId(), execution.getStatus().toString(), null, null);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
             return new JobStatusDto(null, "ERROR", "An error occurred.", e.getMessage());
         }
+    }
+
+    @Override
+    public List<DailySummary> getSummaryRecords(Long pJobId) {
+        return transactionRepository.getDailySummary(pJobId);
     }
 
     @Override
@@ -50,11 +62,6 @@ public class TransactionServiceImpl implements TransactionService {
             return new JobStatusDto(pJobId, execution.getStatus().toString(), null, null);
         }
         return new JobStatusDto(pJobId, "ERROR", "Job ID not found.", null);
-    }
-
-    @Override
-    public List<DailySummary> getSummaryRecords(Long pJobId) {
-        return transactionRepository.getDailySummary(pJobId);
     }
 
 }
