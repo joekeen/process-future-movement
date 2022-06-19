@@ -14,11 +14,9 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;

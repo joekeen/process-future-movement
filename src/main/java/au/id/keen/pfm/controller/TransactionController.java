@@ -42,7 +42,7 @@ public class TransactionController {
     }
 
     private ResponseEntity<?> getResponse(List<DailySummary> pSummaries, DownloadFormatEnum pFormat) {
-        if (pFormat == null) {
+        if (pFormat == null) { // return JSON
             return ResponseEntity.ok(pSummaries);
         }
         return ResponseEntity.ok()
