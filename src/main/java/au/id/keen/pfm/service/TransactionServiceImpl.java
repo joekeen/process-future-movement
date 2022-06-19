@@ -39,7 +39,7 @@ public class TransactionServiceImpl implements TransactionService {
             JobExecution execution = jobLauncher.run(uploadJob, builder.toJobParameters());
             return new JobStatusDto(execution.getJobId(), execution.getStatus().toString(), null, null);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
-            return new JobStatusDto(null, null, "An error occurred.", e.getMessage());
+            return new JobStatusDto(null, "ERROR", "An error occurred.", e.getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (execution != null) {
             return new JobStatusDto(pJobId, execution.getStatus().toString(), null, null);
         }
-        return new JobStatusDto(pJobId, null, "Job ID not found.", null);
+        return new JobStatusDto(pJobId, "ERROR", "Job ID not found.", null);
     }
 
     @Override
