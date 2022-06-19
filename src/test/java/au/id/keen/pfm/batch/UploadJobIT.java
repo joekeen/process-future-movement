@@ -6,7 +6,10 @@ import au.id.keen.pfm.dto.DailySummary;
 import au.id.keen.pfm.repository.TransactionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
@@ -55,7 +58,6 @@ public class UploadJobIT {
     @Test
     public void testSummariseInputFile() throws Exception {
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(defaultJobParameters());
-        JobInstance instance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
         assertEquals("COMPLETED", exitStatus.getExitCode());
