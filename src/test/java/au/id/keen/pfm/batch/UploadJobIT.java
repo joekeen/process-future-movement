@@ -52,12 +52,6 @@ public class UploadJobIT {
         jobRepositoryTestUtils.removeJobExecutions();
     }
 
-    private JobParameters defaultJobParameters() throws IOException {
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addString("file.path", input.getFile().getAbsolutePath());
-        return builder.toJobParameters();
-    }
-
     @Test
     public void testSummariseInputFile() throws Exception {
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(defaultJobParameters());
@@ -98,4 +92,9 @@ public class UploadJobIT {
         assertThat(summary5.getTotalTransactionAmount()).isEqualTo("-79");
     }
 
+    private JobParameters defaultJobParameters() throws IOException {
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addString("file.path", input.getFile().getAbsolutePath());
+        return builder.toJobParameters();
+    }
 }
