@@ -4,9 +4,8 @@ import au.id.keen.pfm.ProcessedFutureMovementApplication;
 import au.id.keen.pfm.domain.Transaction;
 import au.id.keen.pfm.dto.DailySummary;
 import au.id.keen.pfm.repository.TransactionRepository;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
@@ -18,7 +17,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
@@ -27,8 +25,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
-@RunWith(SpringRunner.class)
 @SpringBatchTest
 @EnableAutoConfiguration
 @ContextConfiguration(classes = {ProcessedFutureMovementApplication.class})
@@ -53,7 +49,7 @@ public class UploadJobIT {
     @Value("input/Input.txt")
     private Resource input;
 
-    @After
+    @AfterEach
     public void cleanUp() {
         jobRepositoryTestUtils.removeJobExecutions();
     }
