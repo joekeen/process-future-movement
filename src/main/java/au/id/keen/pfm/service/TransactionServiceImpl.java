@@ -14,9 +14,11 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
+@Transactional
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
@@ -32,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public JobStatusDto upload(String pPath) {
+    public JobStatusDto processFile(String pPath) {
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addString("file.path", pPath);
         try {
@@ -44,16 +46,16 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public JobStatusDto queryJob(Long pJobId) {
+    public JobStatusDto getJobStatus(Long pJobId) {
         JobExecution execution = jobExplorer.getJobExecution(pJobId);
         if (execution != null) {
             return new JobStatusDto(pJobId, execution.getStatus().toString(), null, null);
         }
-        return new JobStatusDto(pJobId, null, "Job ID not found", null);
+        return new JobStatusDto(pJobId, null, "Job ID not found.", null);
     }
 
     @Override
-    public List<DailySummary> getRecords(Long pJobId) {
+    public List<DailySummary> getSummaryRecords(Long pJobId) {
         return transactionRepository.getDailySummary(pJobId);
     }
 

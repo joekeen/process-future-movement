@@ -6,9 +6,9 @@ import au.id.keen.pfm.dto.JobStatusDto;
 import java.util.List;
 
 public interface TransactionService {
-    List<DailySummary> getRecords(Long pJobId);
+    List<DailySummary> getSummaryRecords(Long pJobId);
 
-    JobStatusDto upload(String pPath);
+    JobStatusDto processFile(String pPath);
 
-    JobStatusDto queryJob(Long pJobId);
+    JobStatusDto getJobStatus(Long pJobId);
 }

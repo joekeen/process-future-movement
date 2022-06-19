@@ -25,19 +25,19 @@ public class TransactionController {
     }
 
     @PostMapping("/upload")
-    public JobStatusDto upload(@RequestParam(name = "file") MultipartFile pFile) throws IOException {
-        return transactionService.upload(FileUtils.getTempFile(pFile).getAbsolutePath());
+    public JobStatusDto postUploadFile(@RequestParam(name = "file") MultipartFile pFile) throws IOException {
+        return transactionService.processFile(FileUtils.getTempFile(pFile).getAbsolutePath());
     }
 
     @GetMapping("/job/{pJobId}")
-    public JobStatusDto job(@PathVariable Long pJobId) {
-        return transactionService.queryJob(pJobId);
+    public JobStatusDto getJobStatus(@PathVariable Long pJobId) {
+        return transactionService.getJobStatus(pJobId);
     }
 
     @GetMapping("/summary/{pJobId}")
     public ResponseEntity<?> getSummary(@PathVariable Long pJobId,
                                         @RequestParam(required = false, name = "format") DownloadFormatEnum pFormat) {
-        List<DailySummary> summaries = transactionService.getRecords(pJobId);
+        List<DailySummary> summaries = transactionService.getSummaryRecords(pJobId);
         return getResponse(summaries, pFormat);
     }
 

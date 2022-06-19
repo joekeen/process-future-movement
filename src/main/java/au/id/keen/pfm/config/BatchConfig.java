@@ -32,36 +32,29 @@ import java.util.EnumSet;
 
 @Configuration
 @EnableBatchProcessing
-public class FutureTransactionBatchConfig {
+public class BatchConfig {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
+    private final int chunkSize;
 
-    public FutureTransactionBatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
+    public BatchConfig(@Value("${job.upload.chunk.size:20}") int pChunkSize, JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
+        this.chunkSize = pChunkSize;
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
     }
 
     @Bean
-    public JobLauncher asyncJobLauncher(JobRepository pJobRepository) throws Exception {
-        SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
-        jobLauncher.setJobRepository(pJobRepository);
-        jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor());
-        jobLauncher.afterPropertiesSet();
-        return jobLauncher;
-    }
-
-    @Bean
     public Job uploadJob(ItemReader<Transaction> pItemReader, ItemWriter<Transaction> pItemWriter) {
         return jobBuilderFactory.get("uploadJob")
-                .start(processFile(pItemReader, pItemWriter))
+                .start(processStep(pItemReader, pItemWriter))
                 .build();
     }
 
     @Bean
-    public Step processFile(ItemReader<Transaction> pItemReader, ItemWriter<Transaction> pItemWriter) {
-        return stepBuilderFactory.get("processFile")
-                .<Transaction, Transaction>chunk(20)
+    public Step processStep(ItemReader<Transaction> pItemReader, ItemWriter<Transaction> pItemWriter) {
+        return stepBuilderFactory.get("processStep")
+                .<Transaction, Transaction>chunk(chunkSize)
                 .reader(pItemReader)
                 .writer(pItemWriter)
                 .build();
@@ -97,6 +90,15 @@ public class FutureTransactionBatchConfig {
         reader.setLineMapper(lineMapper);
 
         return reader;
+    }
+
+    @Bean
+    public JobLauncher asyncJobLauncher(JobRepository pJobRepository) throws Exception {
+        SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
+        jobLauncher.setJobRepository(pJobRepository);
+        jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor());
+        jobLauncher.afterPropertiesSet();
+        return jobLauncher;
     }
 
 }
