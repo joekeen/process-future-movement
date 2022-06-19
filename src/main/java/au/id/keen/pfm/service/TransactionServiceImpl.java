@@ -14,6 +14,7 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -51,11 +52,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DailySummary> getSummaryRecords(Long pJobId) {
         return transactionRepository.getDailySummary(pJobId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public JobStatusDto getJobStatus(Long pJobId) {
         JobExecution execution = jobExplorer.getJobExecution(pJobId);
         if (execution != null) {
