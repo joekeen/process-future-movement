@@ -21,8 +21,8 @@ public class RecordFieldSetMapper implements FieldSetMapper<Transaction> {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DATE_FORMAT);
 
         Transaction transaction = new Transaction();
-
         transaction.setJobId(jobId);
+
         transaction.setRecordCode(pFieldSet.readString(TransactionFieldV1Enum.RECORD_CODE.getFieldName()));
         transaction.setClientType(pFieldSet.readString(TransactionFieldV1Enum.CLIENT_TYPE.getFieldName()));
         transaction.setClientNumber(pFieldSet.readString(TransactionFieldV1Enum.CLIENT_NUMBER.getFieldName()));
@@ -32,8 +32,8 @@ public class RecordFieldSetMapper implements FieldSetMapper<Transaction> {
         transaction.setProductGroupCode(pFieldSet.readString(TransactionFieldV1Enum.PRODUCT_GROUP_CODE.getFieldName()));
         transaction.setExchangeCode(pFieldSet.readString(TransactionFieldV1Enum.EXCHANGE_CODE.getFieldName()));
         transaction.setSymbol(pFieldSet.readString(TransactionFieldV1Enum.SYMBOL.getFieldName()));
-        String dateString = pFieldSet.readString(TransactionFieldV1Enum.EXPIRATION_DATE.getFieldName());
-        transaction.setExpirationDate(LocalDate.parse(dateString, formatter));
+        String expirationDateString = pFieldSet.readString(TransactionFieldV1Enum.EXPIRATION_DATE.getFieldName());
+        transaction.setExpirationDate(LocalDate.parse(expirationDateString, formatter));
         transaction.setCurrencyCode(pFieldSet.readString(TransactionFieldV1Enum.CURRENCY_CODE.getFieldName()));
         transaction.setMovementCode(pFieldSet.readString(TransactionFieldV1Enum.MOVEMENT_CODE.getFieldName()));
         transaction.setBuySellCode(pFieldSet.readString(TransactionFieldV1Enum.BUY_SELL_CODE.getFieldName()));
@@ -50,8 +50,8 @@ public class RecordFieldSetMapper implements FieldSetMapper<Transaction> {
         transaction.setCommission(pFieldSet.readString(TransactionFieldV1Enum.COMMISSION.getFieldName()));
         transaction.setCommissionDC(pFieldSet.readString(TransactionFieldV1Enum.COMMISSION_DC.getFieldName()));
         transaction.setCommissionCurCode(pFieldSet.readString(TransactionFieldV1Enum.COMMISSION_CUR_CODE.getFieldName()));
-        dateString = pFieldSet.readString(TransactionFieldV1Enum.TRANSACTION_DATE.getFieldName());
-        transaction.setTransactionDate(LocalDate.parse(dateString, formatter));
+        String transactionDateString = pFieldSet.readString(TransactionFieldV1Enum.TRANSACTION_DATE.getFieldName());
+        transaction.setTransactionDate(LocalDate.parse(transactionDateString, formatter));
         transaction.setFutureReference(pFieldSet.readString(TransactionFieldV1Enum.FUTURE_REFERENCE.getFieldName()));
         transaction.setTicketNumber(pFieldSet.readString(TransactionFieldV1Enum.TICKET_NUMBER.getFieldName()));
         transaction.setExternalNumber(pFieldSet.readString(TransactionFieldV1Enum.EXTERNAL_NUMBER.getFieldName()));
