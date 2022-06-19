@@ -23,6 +23,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import java.io.IOException;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBatchTest
@@ -43,9 +44,6 @@ public class UploadJobIT {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    @Autowired
-    private Job uploadJob;
-
     @Value("input/Input.txt")
     private Resource input;
 
@@ -61,7 +59,7 @@ public class UploadJobIT {
     }
 
     @Test
-    public void test() throws Exception {
+    public void testSummariseInputFile() throws Exception {
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(defaultJobParameters());
         JobInstance instance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
@@ -73,6 +71,31 @@ public class UploadJobIT {
 
         List<DailySummary> records = transactionRepository.getDailySummary(jobExecution.getJobId());
         assertEquals(5, records.size());
+
+        DailySummary summary1 = records.get(0);
+        assertThat(summary1.getClientInformation()).isEqualTo("CL123400020001");
+        assertThat(summary1.getProductInformation()).isEqualTo("SGXFUNK20100910");
+        assertThat(summary1.getTotalTransactionAmount()).isEqualTo("-52");
+
+        DailySummary summary2 = records.get(1);
+        assertThat(summary2.getClientInformation()).isEqualTo("CL123400030001");
+        assertThat(summary2.getProductInformation()).isEqualTo("CMEFUN120100910");
+        assertThat(summary2.getTotalTransactionAmount()).isEqualTo("285");
+
+        DailySummary summary3 = records.get(2);
+        assertThat(summary3.getClientInformation()).isEqualTo("CL123400030001");
+        assertThat(summary3.getProductInformation()).isEqualTo("CMEFUNK.20100910");
+        assertThat(summary3.getTotalTransactionAmount()).isEqualTo("-215");
+
+        DailySummary summary4 = records.get(3);
+        assertThat(summary4.getClientInformation()).isEqualTo("CL432100020001");
+        assertThat(summary4.getProductInformation()).isEqualTo("SGXFUNK20100910");
+        assertThat(summary4.getTotalTransactionAmount()).isEqualTo("46");
+
+        DailySummary summary5 = records.get(4);
+        assertThat(summary5.getClientInformation()).isEqualTo("CL432100030001");
+        assertThat(summary5.getProductInformation()).isEqualTo("CMEFUN120100910");
+        assertThat(summary5.getTotalTransactionAmount()).isEqualTo("-79");
     }
 
 }
